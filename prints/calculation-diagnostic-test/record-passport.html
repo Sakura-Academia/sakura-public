@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ストリーク・チャレンジ 攻略パスポート</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', 'Yu Gothic', 'Hiragino Kaku Gothic ProN', sans-serif;
+            background: #f0f0f0;
+            padding: 0;
+        }
+
+        @page {
+            size: A4 landscape;
+            margin: 10mm;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .page {
+                page-break-after: always;
+                margin: 0;
+            }
+
+            .no-print {
+                display: none;
+            }
+        }
+
+        .page {
+            width: 277mm;
+            min-height: 190mm;
+            background: white;
+            margin: 20px auto;
+            padding: 15mm;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        /* ステージ別の背景グラデーション */
+        .stage1 {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffffff 50%, #f0f8ff 100%);
+        }
+
+        .stage2 {
+            background: linear-gradient(135deg, #fff8e6 0%, #ffffff 50%, #f0fff4 100%);
+        }
+
+        /* ヘッダー */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #333;
+        }
+
+        .stage1 .header {
+            border-bottom-color: #ff6b6b;
+        }
+
+        .stage2 .header {
+            border-bottom-color: #ffa500;
+        }
+
+        .title-area h1 {
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 5px;
+        }
+
+        .stage1 .title-area h1 {
+            color: #ff6b6b;
+        }
+
+        .stage2 .title-area h1 {
+            color: #ffa500;
+        }
+
+        .title-area .subtitle {
+            font-size: 14px;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .info-boxes {
+            display: flex;
+            gap: 15px;
+        }
+
+        .info-box {
+            border: 2px solid #333;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .info-box label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .info-box input {
+            border: none;
+            border-bottom: 1px solid #333;
+            width: 120px;
+            font-size: 14px;
+            background: transparent;
+        }
+
+        /* 精密診断マップ中心のレイアウト：1カラム全幅・全高 */
+        .main-layout {
+            display: block;
+            margin-bottom: 0;
+        }
+
+        .diagnostic-section {
+            width: 100%;
+        }
+
+        /* 診断チェックリスト（4カラムに拡大、余白の最適化） */
+        .checklist-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px 20px;
+            border: 2px solid #333;
+            padding: 15px;
+            background: #fff;
+            min-height: 520px;
+            /* 紙面の下部まで広げる */
+        }
+
+        .check-item {
+            display: grid;
+            grid-template-columns: 35px 1fr 50px;
+            align-items: center;
+            border-bottom: 1px dashed #ccc;
+            padding: 6px 0;
+            font-size: 12px;
+        }
+
+        .q-num {
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            font-size: 14px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            margin-right: 6px;
+            padding: 2px 0;
+        }
+
+        .menu-name {
+            font-size: 11px;
+            line-height: 1.2;
+            padding-left: 2px;
+            font-weight: bold;
+        }
+
+        .check-boxes {
+            display: flex;
+            justify-content: space-around;
+            gap: 6px;
+        }
+
+        .check-circle {
+            width: 22px;
+            height: 22px;
+            border: 1.5px solid #333;
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+        }
+
+        .check-label {
+            position: absolute;
+            top: -16px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            color: #444;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        /* 下部エリア（完全に削除されるが、構造維持のため） */
+        .bottom-row {
+            display: none;
+        }
+
+        .rules {
+            background: #fffacd;
+            border: 1px solid #ffa500;
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-size: 10px;
+        }
+
+        .rules-title {
+            font-weight: bold;
+            color: #ff6600;
+            margin-bottom: 3px;
+        }
+
+        .rules-list {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .rule-item {
+            display: flex;
+            align-items: center;
+        }
+
+        /* 印刷ボタン */
+        .no-print {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .print-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .print-btn:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <button class="no-print print-btn" onclick="window.print()">🖨️ 印刷する</button>
+
+    <!-- ========== ステージ1：反射神経①（40問） ========== -->
+    <div class="page stage1">
+        <div class="header">
+            <div class="title-area">
+                <h1>🔥 ステージ1：精密診断パスポート（反射神経①）</h1>
+                <p class="subtitle">1問ずつ「詰まり」を解消して、計算の基礎体力を自動化しよう！</p>
+            </div>
+            <div class="info-boxes">
+                <div class="info-box"><label>名前：</label><input type="text" /></div>
+                <div class="info-box"><label>目標：</label><input type="text" style="width: 50px;" /> 問</div>
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <!-- 左：記録ログ -->
+            <div class="section record-section">
+                <div class="section-title">📝 記録ログ（10回分）</div>
+                <table class="record-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">回</th>
+                            <th style="width: 25%;">月日</th>
+                            <th style="width: 25%;">セット</th>
+                            <th style="width: 40%;">記録(問)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td> / </td>
+                            <td>A B C D E</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td> / </td>
+                            <td>A B C D E</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td> / </td>
+                            <td>A B C D E</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td> / </td>
+                            <td>A B C D E</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <!-- 精密診断チェックリストのみ -->
+                            <div class="section diagnostic-section">
+                                <div class="section-title">🔍 精密診断マップ：詰まった問題に「詰」、遅かった問題に「時」を〇しよう</div>
+                                <div class="checklist-grid" id="checklist-s1-1">
+                                    <script>
+                                        const mapping1 = [
+                                            { q: '1,2', m: 'A:小数分数 Lv.1' }, { q: '3,4', m: 'B:平方三角 Lv.1' }, { q: '5,6', m: 'C:3.14の段 Lv.1' }, { q: '7,8', m: 'D:素数倍数 Lv.1' },
+                                            { q: '9,10', m: 'A:小数分数 Lv.2' }, { q: '11,12', m: 'B:平方三角 Lv.2' }, { q: '13,14', m: 'C:3.14の段 Lv.2' }, { q: '15,16', m: 'D:素数倍数 Lv.2' },
+                                            { q: '17,18', m: 'A:小数分数 Lv.3' }, { q: '19,20', m: 'B:平方三角 Lv.3' }, { q: '21,22', m: 'C:3.14の段 Lv.3' }, { q: '23,24', m: 'D:素数倍数 Lv.3' },
+                                            { q: '25,26', m: 'A:小数分数 Lv.4' }, { q: '27,28', m: 'B:平方三角 Lv.4' }, { q: '29,30', m: 'C:3.14の段 Lv.4' }, { q: '31,32', m: 'D:素数倍数 Lv.4' },
+                                            { q: '33,34', m: 'A:小数分数 Lv.5' }, { q: '35,36', m: 'B:平方三角 Lv.5' }, { q: '37,38', m: 'C:3.14の段 Lv.5' }, { q: '39,40', m: 'D:素数倍数 Lv.5' }
+                                        ];
+                                        document.write(mapping1.map(item => `
+                            <div class="check-item">
+                                <div class="q-num">${item.q}</div>
+                                <div class="menu-name">${item.m}</div>
+                                <div class="check-boxes">
+                                    <div class="check-circle"><span class="check-label">詰</span></div>
+                                    <div class="check-circle"><span class="check-label">時</span></div>
+                                </div>
+                            </div>
+                        `).join(''));
+                                    </script>
+                                </div>
+                            </div>
+            </div>
+
+            <div class="bottom-row">
+                <div class="rules">
+                    <div class="rules-title">📋 攻略サイクル</div>
+                    <div class="rules-list">
+                        <div class="rule-item"><strong>1. 挑戦：</strong>3分計測。番号順にやる</div>
+                        <div class="rule-item"><strong>2. 診断：</strong>詰まった・遅かった問題の「詰・時」に〇</div>
+                        <div class="rule-item"><strong>3. 訓練：</strong>〇がついた単元のレベル1&2を完璧にする</div>
+                        <div class="rule-item"><strong>4. 再戦：</strong>全問「〇なし」になるまで繰り返す</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="rules">
+            <div class="rules-title">📋 使い方ガイド</div>
+            <div class="rules-list">
+                <div class="rule-item">
+                    <span class="rule-number">1.</span>
+                    <span class="rule-text"><strong>スタート：</strong>3分間、全力で解く！</span>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-number">2.</span>
+                    <span class="rule-text"><strong>ストップ：</strong>時間が来たら、解けた最後の問題の下に線を引く。</span>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-number">3.</span>
+                    <span class="rule-text"><strong>チェック：</strong>丸付けをして、最初に間違えた問題（カベ）の番号を記録。</span>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-number">4.</span>
+                    <span class="rule-text"><strong>診断：</strong>右の表でカベの番号を探す。それが君がやるべき訓練メニューだ！</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== ステージ1：反射神経②（30問） ========== -->
+    <div class="page stage2">
+        <div class="header">
+            <div class="title-area">
+                <h1>⚡ ステージ1：精密診断パスポート（反射神経②）</h1>
+                <p class="subtitle">計算の仕組みを見抜く力を鍛えて、数学的な直感を手に入れよう！</p>
+            </div>
+            <div class="info-boxes">
+                <div class="info-box"><label>名前：</label><input type="text" /></div>
+                <div class="info-box"><label>目標：</label><input type="text" style="width: 50px;" /> 問</div>
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <!-- 左：記録ログ -->
+            <div class="section record-section">
+                <div class="section-title">📝 記録ログ（10回分）</div>
+                <table class="record-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%;">回</th>
+                            <th style="width: 25%;">月日</th>
+                            <th style="width: 25%;">セット</th>
+                            <th style="width: 40%;">記録(問)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td> / </td>
+                            <td>A B C D E</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td> / </td>
+                            <td>A B C D E</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td> / </td>
+                            <td>A B C D E</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td> / </td>
+                            <td>A B C D E</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td> / </td>
+                            <td>A B C D E</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td> / </td>
+                            <td>A B C D E</td>
+                            <h1>🔍 弱点発見：サバイバルテスト1-1 精密診断マップ</h1>
+                            <p class="subtitle">ミスした問題に「詰」、時間がかかった問題に「時」を〇しよう</p>
+            </div>
+            <div class="info-boxes">
+                <div class="info-box"><label>名前：</label><input type="text" /></div>
+                <div class="info-box"><label>点数：</label><input type="text" style="width: 50px;" /> / 40</div>
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <div class="section diagnostic-section">
+                <div class="checklist-grid" id="checklist-s1-1">
+                    <script>
+                        (function () {
+                            const mapping_s1_1 = [
+                                { q: '1,2', m: 'A:小数分数 Lv.1' }, { q: '3,4', m: 'B:平方三角 Lv.1' }, { q: '5,6', m: 'C:3.14の段 Lv.1' }, { q: '7,8', m: 'D:素数倍数 Lv.1' },
+                                { q: '9,10', m: 'A:小数分数 Lv.2' }, { q: '11,12', m: 'B:平方三角 Lv.2' }, { q: '13,14', m: 'C:3.14の段 Lv.2' }, { q: '15,16', m: 'D:素数倍数 Lv.2' },
+                                { q: '17,18', m: 'A:小数分数 Lv.3' }, { q: '19,20', m: 'B:平方三角 Lv.3' }, { q: '21,22', m: 'C:3.14の段 Lv.3' }, { q: '23,24', m: 'D:素数倍数 Lv.3' },
+                                { q: '25,26', m: 'A:小数分数 Lv.4' }, { q: '27,28', m: 'B:平方三角 Lv.4' }, { q: '29,30', m: 'C:3.14の段 Lv.4' }, { q: '31,32', m: 'D:素数倍数 Lv.4' },
+                                { q: '33,34', m: 'A:小数分数 Lv.5' }, { q: '35,36', m: 'B:平方三角 Lv.5' }, { q: '37,38', m: 'C:3.14の段 Lv.5' }, { q: '39,40', m: 'D:素数倍数 Lv.5' }
+                            ];
+                            document.write(mapping_s1_1.map(item => `
+                                <div class="check-item">
+                                    <div class="q-num">${item.q}</div>
+                                    <div class="menu-name">${item.m}</div>
+                                    <div class="check-boxes">
+                                        <div class="check-circle"><span class="check-label">詰</span></div>
+                                        <div class="check-circle"><span class="check-label">時</span></div>
+                                    </div>
+                                </div>
+                            `).join(''));
+                        })();
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== ステージ1：精密診断マップ（反射神経②） ========== -->
+    <div class="page stage2">
+        <div class="header">
+            <div class="title-area">
+                <h1>🔍 弱点発見：サバイバルテスト1-2 精密診断マップ</h1>
+                <p class="subtitle">ミスした問題に「詰」、時間がかかった問題に「時」を〇しよう</p>
+            </div>
+            <div class="info-boxes">
+                <div class="info-box"><label>名前：</label><input type="text" /></div>
+                <div class="info-box"><label>点数：</label><input type="text" style="width: 50px;" /> / 30</div>
+            </div>
+        </div>
+
+        <div class="main-layout">
+            <div class="section diagnostic-section">
+                <div class="checklist-grid" id="checklist-s1-2">
+                    <script>
+                        (function () {
+                            const mapping_s1_2 = [
+                                { q: '1,2', m: 'E-1:25×4/125×8 Lv.1' }, { q: '3,4', m: 'F-1:積→商の変換 Lv.1' }, { q: '5', m: 'G-1:概数（切り下げ） Lv.1' }, { q: '6', m: 'G-2:四捨五入の範囲 Lv.1' },
+                                { q: '7,8', m: 'E-1:625×16/25×.. Lv.2' }, { q: '9,10', m: 'F-1:15×6/13×6.. Lv.2' }, { q: '11', m: 'G-1:概数（切り上げ） Lv.2' }, { q: '12', m: 'G-2:四捨五入の範囲 Lv.2' },
+                                { q: '13', m: 'E-1:逆算(25×..) Lv.3' }, { q: '14,15', m: 'E-2:補数(100/1000) Lv.3' }, { q: '16', m: 'F-1:積→商(2桁×1) Lv.3' }, { q: '17', m: 'F-2:素因数分解 Lv.3' },
+                                { q: '18', m: 'G-1:概数（四捨五入） Lv.3' }, { q: '19', m: 'G-2:四捨五入の範囲 Lv.3' }, { q: '20', m: 'E-1:625×16/125×8 Lv.4' }, { q: '21,22', m: 'E-2:大きな数の足引 Lv.4' },
+                                { q: '23', m: 'F-1:積→商(12×13) Lv.4' }, { q: '24', m: 'F-2:素因数分解 Lv.4' }, { q: '25', m: 'G-1:概数（小第一） Lv.4' }, { q: '26', m: 'G-2:範囲(小第一) Lv.4' },
+                                { q: '27', m: 'E-1:分配法則(25/125) Lv.5' }, { q: '28', m: 'E-2:補数の足し算 Lv.5' }, { q: '29', m: 'F-1:2桁×2桁(19×18) Lv.5' }, { q: '30', m: 'G-2:範囲(小第二) Lv.5' }
+                            ];
+                            document.write(mapping_s1_2.map(item => `
+                                <div class="check-item">
+                                    <div class="q-num">${item.q}</div>
+                                    <div class="menu-name">${item.m}</div>
+                                    <div class="check-boxes">
+                                        <div class="check-circle"><span class="check-label">詰</span></div>
+                                        <div class="check-circle"><span class="check-label">時</span></div>
+                                    </div>
+                                </div>
+                            `).join(''));
+                        })();
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

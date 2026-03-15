@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漢字・ふりがなチェッカー - 桜アカデミア</title>
+    <style>
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .version-badge {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .version-badge span {
+            display: inline-block;
+            background-color: #d1e7dd;
+            color: #0f5132;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            border: 1px solid #badbcc;
+        }
+
+        /* コントロールエリア */
+        .controls {
+            background: #eaf2f8;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid #d6eaf8;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 15px 30px;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-row.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .control-label {
+            font-weight: bold;
+            font-size: 14px;
+            color: #34495e;
+            min-width: 85px;
+            display: inline-block;
+        }
+
+        select {
+            padding: 8px;
+            font-size: 15px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            flex-grow: 1;
+            max-width: 250px;
+        }
+
+        .radio-group,
+        .checkbox-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            background: #fff;
+            padding: 8px 15px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            flex-grow: 1;
+        }
+
+        .radio-group label,
+        .checkbox-group label {
+            font-weight: normal;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 0;
+            font-size: 14px;
+        }
+
+        /* 情報表示エリア */
+        .mojibake-info-container {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .info-section {
+            background-color: #fcfdfe;
+            border: 1px solid #d6eaf8;
+            border-radius: 6px;
+            padding: 15px;
+            font-size: 12px;
+        }
+
+        .info-section b {
+            display: block;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            font-size: 13px;
+        }
+
+        .section-auto {
+            border-left: 4px solid #3498db;
+        }
+
+        .section-auto b {
+            color: #2980b9;
+            border-bottom: 1px solid #d6eaf8;
+        }
+
+        .section-proof {
+            border-left: 4px solid #e67e22;
+        }
+
+        .section-proof b {
+            color: #d35400;
+            border-bottom: 1px solid #fadbd8;
+        }
+
+        .mojibake-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .mojibake-item {
+            background: #fff;
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid #deeef9;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+        }
+
+        .mojibake-item strong {
+            color: #c0392b;
+        }
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+            font-family: inherit;
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+            box-shadow: 0 4px 0 #2980b9;
+            margin-bottom: 10px;
+        }
+
+        .btn-main:hover {
+            background-color: #2980b9;
+            box-shadow: 0 2px 0 #2980b9;
+            transform: translateY(2px);
+        }
+
+        .btn-sub {
+            width: 100%;
+            padding: 10px;
+            background-color: #95a5a5;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 20px;
+        }
+
+        #kanjiReference {
+            display: none;
+            margin-top: 10px;
+            padding: 20px;
+            background: #f9f9f9;
+            border: 1px dashed #ccc;
+            border-radius: 6px;
+        }
+
+        .grade-block {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .grade-title {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 15px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .grade-count {
+            background: #34495e;
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+
+        .kanji-list {
+            font-size: 14px;
+            word-break: break-all;
+            letter-spacing: 2px;
+            color: #555;
+        }
+
+        #outputArea {
+            margin-top: 30px;
+            padding: 30px;
+            border: 2px solid #eee;
+            border-radius: 4px;
+            background-color: #fff;
+            font-size: 18px;
+            line-height: 4.0;
+            min-height: 100px;
+        }
+
+        /* 共通警告基準 */
+        .kanji-target,
+        .typo-alert {
+            font-weight: bold;
+            border-radius: 2px;
+            padding: 0 2px;
+            position: relative;
+        }
+
+        /* 漢字色分け */
+        .mode-split .kanji-first {
+            color: #d63031;
+            background-color: #fff5f5;
+        }
+
+        .mode-split .kanji-repeat {
+            color: #006400;
+            background-color: #ccff90;
+        }
+
+        .mode-allred .kanji-first,
+        .mode-allred .kanji-repeat {
+            color: #d63031;
+            font-weight: bold;
+            background-color: #fff5f5;
+        }
+
+        /* 校正注意用スタイル [UPDATE] */
+        .typo-alert {
+            background-color: #fff3cd;
+            color: #856404;
+            border-bottom: 4px solid #e67e22 !important;
+        }
+
+        .typo-alert::after {
+            content: attr(data-hint);
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #d35400;
+            font-weight: bold;
+            white-space: nowrap;
+            line-height: 1;
+            pointer-events: none;
+            padding-top: 5px;
+            z-index: 10;
+        }
+
+        /* 漢字警告 */
+        .warning-missing-furigana,
+        .warning-extra-furigana,
+        .warning-check-furigana {
+            border-bottom: 4px solid #ff0000 !important;
+            background-color: transparent !important;
+        }
+
+        .warning-missing-furigana::after,
+        .warning-extra-furigana::after,
+        .warning-check-furigana::after {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #ff0000;
+            font-weight: bold;
+            white-space: nowrap;
+            line-height: 1;
+            pointer-events: none;
+            padding-top: 5px;
+        }
+
+        .warning-missing-furigana::after {
+            content: "ふりがな必要！";
+        }
+
+        .warning-extra-furigana::after {
+            content: "ふりがな不要！";
+        }
+
+        .warning-check-furigana::after {
+            content: "ルビ違い？";
+        }
+
+        .legend {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #555;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+        .badge {
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+            border: 1px solid #ccc;
+            font-size: 11px;
+            display: inline-block;
+        }
+
+        .badge-warn {
+            border-bottom: 3px solid red;
+            color: black;
+            font-weight: bold;
+        }
+
+        .badge-typo {
+            background-color: #fff3cd;
+            color: #856404;
+            border-bottom: 2px solid #e67e22;
+        }
+
+        @media (max-width: 800px) {
+            .mojibake-info-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>漢字・ふりがなチェッカー <small>ver5.5</small></h1>
+
+        <div class="version-badge">
+            <span>✅ 平成29年告示 (令和2年度〜実施) 対応 ／ 全1026文字</span>
+        </div>
+
+        <div class="controls">
+            <div class="control-row">
+                <span class="control-label">作成学年:</span>
+                <select id="gradeSelect">
+                    <option value="1">1年生 / 新2年生</option>
+                    <option value="2">2年生 / 新3年生</option>
+                    <option value="3" selected>3年生 / 新4年生</option>
+                    <option value="4">4年生 / 新5年生</option>
+                    <option value="5">5年生 / 新6年生</option>
+                    <option value="6">6年生</option>
+                </select>
+            </div>
+            <div class="control-row">
+                <span class="control-label">簡易校正:</span>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="proofreadMode"> 校正モードを有効にする</label>
+                </div>
+            </div>
+            <div class="control-row">
+                <span class="control-label">貼り付け元:</span>
+                <div class="radio-group">
+                    <label><input type="radio" name="sourceMode" value="ichitaro" checked> 一太郎 (警告あり)</label>
+                    <label><input type="radio" name="sourceMode" value="pdf"> PDF (警告なし)</label>
+                </div>
+            </div>
+            <div class="control-row">
+                <span class="control-label">色分け:</span>
+                <div class="radio-group">
+                    <label><input type="radio" name="colorMode" value="split" checked> 初回:赤 / 2回目:黄緑</label>
+                    <label><input type="radio" name="colorMode" value="allred"> すべて赤字</label>
+                </div>
+            </div>
+            <div class="control-row full-width">
+                <span class="control-label">整形:</span>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="formatText" checked> 改行を自動で整える（算数プリント貼り付け時に推奨）</label>
+                </div>
+            </div>
+            <div class="mojibake-info-container">
+                <div class="info-section section-auto">
+                    <b>🔄 自動的に行われる文字修復</b>
+                    <div class="mojibake-list">
+                        <div class="mojibake-item">或すべて → <strong>㎠</strong></div>
+                        <div class="mojibake-item">数字＋安・(安) → <strong>㎤</strong></div>
+                        <div class="mojibake-item">唄〜噂 → <strong>(1)〜(10)</strong></div>
+                    </div>
+                </div>
+                <div class="info-section section-proof">
+                    <b>📝 簡易校閲ルール (校正ON時)</b>
+                    <div class="mojibake-list">
+                        <div class="mojibake-item">1桁数字：<strong>全角推奨</strong></div>
+                        <div class="mojibake-item">2桁以上：<strong>半角推奨</strong></div>
+                        <div class="mojibake-item">読点「、」 → <strong>「，」</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <textarea id="inputText" placeholder="文章を貼り付けてください。"></textarea>
+        <button class="btn-main" onclick="analyzeText()">チェック実行</button>
+        <button class="btn-sub" onclick="resetAll()">🔄 リセット</button>
+        <button class="btn-sub" onclick="toggleKanjiList()" id="toggleBtn">▼ 各学年の配当漢字一覧を表示する</button>
+        <div id="kanjiReference"></div>
+        <div class="legend">
+            <span><span class="badge" style="background:#fff5f5; color:#d63031; border-color:#d63031;">赤</span>
+                初回</span>
+            <span><span class="badge" style="background:#ccff90; color:#006400; border-color:#ccff90;">黄緑</span>
+                既出</span>
+            <span><span class="badge-typo badge">橙下線</span> 校正注意</span>
+            <span><span class="badge badge-warn">赤下線</span> 警告</span>
+        </div>
+        <div id="outputArea" class="mode-split"></div>
+    </div>
+
+    <script>
+        const kanjiDb = {
+            1: "一右雨円王音下火花貝学気九休玉金空月犬見五口校左三山子四糸字耳七車手十出女小上森人水正生青夕石赤千川先早草足村大男竹中虫町天田土二日入年白八百文木本名目立力林六",
+            2: "引羽雲園遠何科夏家歌画回会海絵外角楽活間丸岩顔汽記帰弓牛魚京強教近兄形計元言原戸古午後語工公広交光考行高黄合谷国黒今才細作算止市矢姉思紙寺自時室社弱首秋週春書少場色食心新親図数西声星晴切雪船線前組走多太体台地池知茶昼長鳥朝直通弟店点電刀冬当東答頭同道読内南肉馬売買麦半番父風分聞米歩母方北毎妹万明鳴毛門夜野友用曜来里理話",
+            3: "悪安暗医委意育員院飲運泳駅央横屋温化荷界開階寒感漢館岸起期客究急級宮球去橋業曲局銀区苦具君係軽血決研県庫湖向幸港号根祭皿仕死使始指歯詩次事持式実写者主守取酒受州拾終習集住重宿所暑助昭消商章勝乗植申身神真深進世整昔全相送想息速族他打対待代第題炭短談着注柱丁帳調追定庭笛鉄転都度投豆島湯登等動童農波配倍箱畑発反坂板皮悲美鼻筆氷表秒病品負部服福物平返勉放味命面問役薬由油有遊予羊洋葉陽様落流旅両緑礼列練路和",
+            4: "愛案以衣位茨印英栄媛塩岡億加果貨課芽賀改械害街各覚潟完官管関観願岐希季旗器機議求泣給挙漁共協鏡競極熊訓軍郡群径景芸欠結建健験固功好香候康佐差菜最埼材崎昨札刷察参産散残氏司試児治滋辞鹿失借種周祝順初松笑唱焼照城縄臣信井成省清静席積折節説浅戦選然争倉巣束側続卒孫帯隊達単置仲沖兆低底的典伝徒努灯働特徳栃奈梨熱念敗梅博阪飯飛必票標不夫付府阜富副兵別辺変便包法望牧末満未民無約勇要養浴利陸良料量輪類令冷例連老労録",
+            5: "圧囲移因永営衛易益液演応往桜可仮価河過快解格確額刊幹慣眼紀基寄規喜技義逆久旧救居許境均禁句型経潔件険検限現減故個護効厚耕航鉱構興講告混査再災妻採際在財罪殺雑酸賛士支史志枝師資飼示似識質舎謝授修述術準序招証象賞条状常情織職制性政勢精製税責績接設絶祖素総造像増則測属率損貸態団断築貯張停提程適統堂銅導得毒独任燃能破犯判版比肥非費備評貧布婦武復複仏粉編弁保墓報豊防貿暴脈務夢迷綿輸余容略留領歴",
+            6: "胃異遺域宇映延沿恩我灰拡革閣割株干巻看難簡危机揮貴疑吸供胸郷勤筋系敬警劇激穴券絹権憲源厳己呼誤后孝皇紅降鋼刻穀骨困砂座済裁策冊蚕至私姿視詞誌磁射捨尺若樹収宗就衆従縦縮熟純処署諸除承将傷障蒸針仁垂推寸盛聖誠舌宣専泉洗染銭善奏窓創装層操蔵臓存尊退宅担探誕段暖値宙忠著庁頂腸潮賃痛敵展討党糖届難乳認納脳派拝背肺俳班晩否批秘俵腹奮並陛閉片補暮宝訪亡忘棒枚幕密盟模訳郵優預幼欲翌乱卵覧裏律臨朗論"
+        };
+
+        const mojibakeMap = { '唄': '(1)', '欝': '(2)', '蔚': '(3)', '鰻': '(4)', '姥': '(5)', '厩': '(6)', '浦': '(7)', '瓜': '(8)', '閏': '(9)', '噂': '(10)' };
+
+        window.onload = function () {
+            const refArea = document.getElementById("kanjiReference");
+            let html = "";
+            for (let g = 1; g <= 6; g++) {
+                const count = kanjiDb[g].length;
+                html += `<div class="grade-block"><div class="grade-title"><span>${g}年生</span><span class="grade-count">${count}文字</span></div><div class="kanji-list">${kanjiDb[g]}</div></div>`;
+            }
+            refArea.innerHTML = html;
+        };
+
+        function toggleKanjiList() {
+            const refArea = document.getElementById("kanjiReference");
+            const btn = document.getElementById("toggleBtn");
+            const isOpen = refArea.style.display === "block";
+            refArea.style.display = isOpen ? "none" : "block";
+            btn.innerText = isOpen ? "▼ 各学年の配当漢字一覧を表示する" : "▲ 一覧を閉じる";
+        }
+
+        function getFuriganaAt(text, index) {
+            if (index >= text.length) return null;
+            const nextChar = text[index];
+            if (nextChar === "（" || nextChar === "(") {
+                const closing = (nextChar === "（") ? "）" : ")";
+                const endIdx = text.indexOf(closing, index);
+                if (endIdx !== -1) return text.substring(index + 1, endIdx);
+            }
+            return null;
+        }
+
+        function analyzeText() {
+            let text = document.getElementById("inputText").value;
+            const targetGradeStart = parseInt(document.getElementById("gradeSelect").value);
+            const proofreadOn = document.getElementById("proofreadMode").checked;
+            const outputArea = document.getElementById("outputArea");
+            const colorMode = document.querySelector('input[name="colorMode"]:checked').value;
+            const sourceMode = document.querySelector('input[name="sourceMode"]:checked').value;
+            outputArea.className = (colorMode === "allred") ? "mode-allred" : "mode-split";
+
+            text = text.replace(/[\(（]或[\)）]/g, '㎠').replace(/或/g, '㎠');
+            text = text.replace(/[\(（]安[\)）]/g, '㎤').replace(/([0-9０-９])安/g, '$1㎤');
+
+            if (proofreadOn) {
+                // 読点
+                text = text.replace(/、/g, `__TYPO_START__、__TYPO_END__HINT__カンマに直して！__`);
+                // 数字
+                text = text.replace(/[0-9０-９\.．]+/g, (match) => {
+                    const len = match.replace(/[\.．]/g, '').length;
+                    const hasFull = /[０-９．]/.test(match);
+                    const hasHalf = /[0-9\.]/.test(match);
+                    if (len === 1 && hasHalf) return `__TYPO_START__${match}__TYPO_END__HINT__全角にして！__`;
+                    if (len >= 2 && hasFull) return `__TYPO_START__${match}__TYPO_END__HINT__半角にして！__`;
+                    return match;
+                });
+            }
+            for (const [key, val] of Object.entries(mojibakeMap)) { text = text.replaceAll(key, val); }
+            if (document.getElementById("formatText")?.checked !== false) {
+                text = text.replace(/\n{3,}/g, '__DOUBLE__').replace(/\n{2}/g, '__SINGLE__').replace(/\n/g, '').replace(/__DOUBLE__/g, '\n\n').replace(/__SINGLE__/g, '\n');
+            }
+
+            let seenKanjiFuriMap = {};
+            let finalHtml = "";
+            text.split('\n').forEach((line) => {
+                let lineHtml = "";
+                for (let i = 0; i < line.length; i++) {
+                    if (line.startsWith("__TYPO_START__", i)) {
+                        const endIdx = line.indexOf("__TYPO_END__", i);
+                        const hintIdx = line.indexOf("__HINT__", endIdx);
+                        const typoWord = line.substring(i + 14, endIdx);
+                        const hintText = line.substring(hintIdx + 8, line.indexOf("__", hintIdx + 8));
+                        lineHtml += `<span class="typo-alert" data-hint="${hintText}">${typoWord}</span>`;
+                        i = line.indexOf("__", hintIdx + 8) + 1; continue;
+                    }
+                    const char = line[i];
+                    const charGrade = getKanjiGrade(char);
+                    if (charGrade !== null && charGrade >= targetGradeStart) {
+                        const currentFuri = getFuriganaAt(line, i + 1);
+                        let isFirst = !(char in seenKanjiFuriMap);
+                        let cssClass = "kanji-target " + (isFirst ? "kanji-first" : "kanji-repeat");
+                        if (isFirst) seenKanjiFuriMap[char] = currentFuri;
+                        if (sourceMode === 'ichitaro') {
+                            if (colorMode === "allred" && !currentFuri) cssClass += " warning-missing-furigana";
+                            else if (colorMode === "split") {
+                                if (isFirst && !currentFuri) cssClass += " warning-missing-furigana";
+                                else if (!isFirst && currentFuri) {
+                                    if (seenKanjiFuriMap[char] !== currentFuri) cssClass += " warning-check-furigana";
+                                    else cssClass += " warning-extra-furigana";
+                                }
+                            }
+                        }
+                        lineHtml += `<span class="${cssClass}">${char}</span>`;
+                    } else if (charGrade !== null && charGrade < targetGradeStart && sourceMode === 'ichitaro') {
+                        // 対象学年未満の漢字にひらがなのふりがなが付いていたら警告
+                        const unnecessaryFuri = getFuriganaAt(line, i + 1);
+                        if (unnecessaryFuri !== null && /^[\u3041-\u3096]+$/.test(unnecessaryFuri)) {
+                            lineHtml += `<span class="kanji-target warning-extra-furigana">${char}</span>`;
+                        } else {
+                            lineHtml += char;
+                        }
+                    } else { lineHtml += char; }
+                }
+                finalHtml += lineHtml + "<br>";
+            });
+            outputArea.innerHTML = finalHtml;
+        }
+        function resetAll() {
+            document.getElementById("inputText").value = "";
+            document.getElementById("outputArea").innerHTML = "";
+        }
+
+        function getKanjiGrade(char) {
+            for (let g = 1; g <= 6; g++) { if (kanjiDb[g].includes(char)) return g; }
+            return char.match(/[\u4E00-\u9FFF]/) ? 7 : null;
+        }
+    </script>
+
+</body>
+
+</html>
