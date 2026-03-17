@@ -1,6 +1,8 @@
 window.curriculumData = [];
 let activeUnitIdx = 0;
 let activePatternIdx = 0;
+const _SAVED_UNIT_KEY = 'calc_active_unit_id';
+const _SAVED_PATTERN_KEY = 'calc_active_pattern';
 let openChapters = new Set();
 let openSections = new Set();
 
@@ -65,6 +67,18 @@ function addData(unitData) {
     } else {
         renderMenu();
     }
+
+    // 保存済みのユニットがロードされたら復元
+    const savedId = localStorage.getItem(_SAVED_UNIT_KEY);
+    if (savedId && unitData.id === savedId) {
+        const savedIdx = window.curriculumData.findIndex(u => u.id === savedId);
+        if (savedIdx !== -1) {
+            activeUnitIdx = savedIdx;
+            activePatternIdx = parseInt(localStorage.getItem(_SAVED_PATTERN_KEY) || '0');
+            renderMenu();
+            renderSheet();
+        }
+    }
 }
 
 function formatLevelName(chapterName) {
@@ -119,6 +133,9 @@ function renderMenu() {
                 unitItem.onclick = (e) => {
                     e.stopPropagation();
                     activeUnitIdx = idx;
+                    activePatternIdx = 0;
+                    localStorage.setItem(_SAVED_UNIT_KEY, unit.id);
+                    localStorage.setItem(_SAVED_PATTERN_KEY, '0');
                     const controls = document.querySelector('.controls');
                     if (controls) controls.style.display = 'flex';
                     renderMenu();
@@ -134,6 +151,7 @@ function setPattern(idx) {
     const unit = window.curriculumData[activeUnitIdx];
     if (!unit || idx >= unit.patterns.length) return;
     activePatternIdx = idx;
+    localStorage.setItem(_SAVED_PATTERN_KEY, String(idx));
     document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === idx));
     renderSheet();
 }
